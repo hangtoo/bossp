@@ -63,6 +63,8 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 		}
 		
 		out.add(m);
+		
+		log.info(header.getLength()+":"+header.getType()+":"+header.getSeq());
 	}
 
 	/**

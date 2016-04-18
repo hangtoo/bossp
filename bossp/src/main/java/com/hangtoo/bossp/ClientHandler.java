@@ -40,7 +40,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
         
-        System.out.println("channelRegistered");
+        log.debug("channelRegistered");
     }
 	
     @Override
@@ -49,7 +49,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     	/*HandleRspMessage msg=new HandleRspMessage();
     	
     	ctx.writeAndFlush(msg);*/
-    	System.out.println("channelActive");
+    	log.debug("channelActive");
     }
     
     /**
@@ -60,7 +60,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("channelRead:"+msg);
+        log.debug("channelRead:"+msg);
     }
 
     /**
@@ -71,7 +71,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelReadComplete");
+        log.debug("channelReadComplete");
+        ctx.flush();
     }
 	
     @Override
@@ -87,7 +88,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             
 	        	HandleReqMessage msg=new HandleReqMessage();
 	        	msg.getHeader().setSeq(Constants.getMsgId());
-	        	//System.out.println("ClientHandler:"+msg);
+	        	//log.debug("ClientHandler:"+msg);
 	        	ctx.writeAndFlush(msg);
             
             }else if(event.state() == IdleState.ALL_IDLE){

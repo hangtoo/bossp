@@ -22,14 +22,7 @@ package com.hangtoo.bossp;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelOutboundHandler;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPromise;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
-
-import java.net.SocketAddress;
 
 import org.apache.log4j.Logger;
 
@@ -45,18 +38,15 @@ import com.hangtoo.bossp.codec.HandleRspMessage;
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger log = Logger.getLogger(ClientHandler.class);
 	
-	
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        
-        System.out.println("channelRegistered");
+        log.debug("channelRegistered");
     }
 	
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
-    	System.out.println("channelActive");
+    	log.debug("channelActive");
     }
     
     /**
@@ -67,12 +57,17 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-
-    	HandleRspMessage retmsg=new HandleRspMessage();
-    	retmsg.getHeader().setSeq(Constants.getSMsgId());
-    	ctx.writeAndFlush(retmsg);
-    	//System.out.println("ServerHandler channelRead and write:"+retmsg);
-        System.out.println("ServerHandler channelRead:"+msg);
+    	
+    	if(msg instanceof HandleReqMessage){
+    		HandleReqMessage message=(HandleReqMessage)msg;
+    		
+    		HandleRspMessage retmsg=new HandleRspMessage();
+        	retmsg.getHeader().setSeq(message.getHeader().getSeq());
+        	ctx.writeAndFlush(retmsg);
+    	}
+    	
+    	//log.debug("ServerHandler channelRead and write:"+retmsg);
+        log.debug("ServerHandler channelRead:"+msg);
     }
 
     /**
@@ -83,28 +78,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-    	//ctx.flush();
-        System.out.println("channelReadComplete");
+        log.debug("channelReadComplete");
+        ctx.flush();
     }
-	
-/*    @Override
-    public void userEventTriggered(
-            ChannelHandlerContext ctx, Object evt)
-            throws Exception {
-        if(IdleStateEvent.class.isAssignableFrom(evt.getClass())){
-            IdleStateEvent event = (IdleStateEvent) evt;
-            if(event.state() == IdleState.READER_IDLE)
-            	log.info("read idle");
-            else if(event.state() == IdleState.WRITER_IDLE)
-                log.info("write idle");
-            else if(event.state() == IdleState.ALL_IDLE){
-            	log.info("all idle");
-            	
-            	HandleRspMessage msg=new HandleRspMessage();
-            	ctx.writeAndFlush(msg);
-            }
-                
-        }
-    }*/
     
 }
