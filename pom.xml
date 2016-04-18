@@ -4,6 +4,10 @@
 	<groupId>com.hangtoo</groupId>
 	<artifactId>bossp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
+	<properties>
+		<spring.version>4.1.6.RELEASE</spring.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
