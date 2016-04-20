@@ -26,6 +26,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
@@ -46,6 +49,8 @@ public class Client {
 	
 	Channel channel;
 	
+	private static ExecutorService executorService= Executors.newSingleThreadExecutor();
+	
 	public Client(String hostname,int port,int connecttimeout) throws InterruptedException{
 
 		HOSTNAME=hostname;
@@ -58,7 +63,20 @@ public class Client {
         .channel(NioSocketChannel.class)
         //.handler(new LoggingHandler(LogLevel.INFO))
         .handler(new ClientInitializer());
-
+        
+        executorService.execute(new connectRunnable());
+	}
+	
+	public class connectRunnable implements Runnable{
+		@Override
+		public void run() {
+			try {
+    			connect();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 	
 	public void connect() throws InterruptedException{
@@ -76,21 +94,6 @@ public class Client {
             	group.shutdownGracefully();
             }
         }
-	}
-	
-	public static void main(String[] args) throws Exception {
-		final Client client =new Client("127.0.0.1",9000,1000);
-		
-        new Thread(){
-        	public void run() {
-        		try {
-        			client.connect();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-        	};
-        }.start();
-		
 	}
 	
 	

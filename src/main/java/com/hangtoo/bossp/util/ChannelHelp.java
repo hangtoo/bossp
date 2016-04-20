@@ -11,14 +11,22 @@ import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
 
-public class SessionHelp {
+/**
+ * channelhelp
+ * 该类会为每个channel设置发送缓存及接收缓存
+ * 并启动一个线程，从发送缓存中获取数据，并发送
+ * sender可以
+ * @author hlf
+ *
+ */
+public class ChannelHelp {
 	
-	static Logger log = Logger.getLogger(SessionHelp.class);
+	static Logger log = Logger.getLogger(ChannelHelp.class);
 	
 	//消息处理线程
     public SendThread sendthread=null;
     
-    public SessionHelp(String serveraddr){
+    public ChannelHelp(String serveraddr){
     	try {
 			sendthread=new SendThread(serveraddr);
 		} catch (InterruptedException e) {
@@ -30,12 +38,25 @@ public class SessionHelp {
 
     //发送消息缓存，其中消息处理线程会逐条获取其中的消息
     
-    private BlockingQueue sendmessges=new ArrayBlockingQueue(Constants.STACKLSIZE);//服务端缓存
+    private BlockingQueue sendmessges=new ArrayBlockingQueue(Constants.SENDBUFFERSIZE);//服务端缓存
     
     //接收到的反馈消息缓存
     public Map<Integer, AbstractMessage> msgbuffer=new Hashtable<Integer, AbstractMessage>();//普通消息服务端缓存
-    
+
+    /**
+     * 放入需要发送的消息，如果满了会阻塞
+     * @param msg
+     */
 	public void putSendMsg(Object msg){
+		while(sendmessges.remainingCapacity()<=1){
+			log.error("发送线程满了，阻塞了");
+			try {
+				sendmessges.wait();
+			} catch (InterruptedException e) {
+				log.error(e);
+			}
+		}
+		
 		synchronized(sendmessges){
 			try {
 				sendmessges.put(msg);
@@ -47,19 +68,23 @@ public class SessionHelp {
 		}
 	}
 	
+	/**
+	 * 如果空了，则会一直阻塞
+	 * @return
+	 */
 	public Object getSendMsg(){
 		long tstart=System.currentTimeMillis();
 		
 		Object obj = null;
 		synchronized(sendmessges){
 			try {
-				if (sendmessges.isEmpty()){
+				while (sendmessges.isEmpty()){//总是需要判断是否为空，因为唤醒时，有可能还是空
 					sendmessges.wait();
 				}
 
 				//obj=sendmessges.pop();
 				obj=sendmessges.take();
-				
+				sendmessges.notifyAll();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				log.error(e);
@@ -71,9 +96,10 @@ public class SessionHelp {
 	}
 	
 	/**
-	 * 遍历并返回数据
+	 * 遍历并返回数据,会等待一段时间，但不会阻塞
 	 * @return
 	 */
+	@Deprecated
 	public AbstractMessage popMsg(){
 		synchronized (msgbuffer) {
 			Iterator<Map.Entry<Integer,AbstractMessage>> iter=msgbuffer.entrySet().iterator();
@@ -98,7 +124,12 @@ public class SessionHelp {
 		}
 	}
 	
-	public AbstractMessage getMsg(int seq) {//该方法需要等待返回
+	/**
+	 * 该方法需要等待返回,会超时返回
+	 * @param seq
+	 * @return
+	 */
+	public AbstractMessage getMsg(int seq) {
 		Object obj=null;
 		synchronized (msgbuffer) {
 			obj = msgbuffer.remove(seq);
@@ -125,7 +156,11 @@ public class SessionHelp {
 		return (AbstractMessage) obj;
 	}
 	
-	public void putMsg(AbstractMessage msg){//该方法会马上返回
+	/**
+	 * 该方法不阻塞，会马上返回,超出缓存会自动清理
+	 * @param msg
+	 */
+	public void putMsg(AbstractMessage msg){
 		synchronized (msgbuffer) {
 			int seq=msg.getHeader().getSeq();
 			if(msgbuffer.size()>=Constants.STACKLSIZE){

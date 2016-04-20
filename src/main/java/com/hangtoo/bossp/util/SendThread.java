@@ -59,7 +59,7 @@ public class SendThread extends Thread {
 					continue;
 				}
 				
-				Object obj = GlobeData.getSendMsg(channel.localAddress().toString());
+				Object obj = ClusterChannelHelp.getSendMsg(channel.localAddress().toString());
 				
 				if(obj instanceof AbstractMessage){
 					client.write((AbstractMessage)obj);

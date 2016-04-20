@@ -42,6 +42,7 @@ public class Constants {
   public final static byte COMMAND_ID_HAND_RSP = (byte)0x8F;
 
   public static final int STACKLSIZE = 256;
+  public static final int SENDBUFFERSIZE = 1000;
   public static final long TIMEOUTTIME = 11 * 1000; //数据获取超时时间
   public static final long DATEREADWAITTIME = 3*10; //数据获取等待时间
   

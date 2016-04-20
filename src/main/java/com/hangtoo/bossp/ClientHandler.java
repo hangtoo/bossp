@@ -28,8 +28,9 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 import org.apache.log4j.Logger;
 
+import com.hangtoo.bossp.codec.AbstractMessage;
 import com.hangtoo.bossp.codec.HandleReqMessage;
-import com.hangtoo.bossp.codec.HandleRspMessage;
+import com.hangtoo.bossp.util.ClusterChannelHelp;
 
 
 public class ClientHandler extends ChannelInboundHandlerAdapter {
@@ -45,10 +46,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 	
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    	
-    	/*HandleRspMessage msg=new HandleRspMessage();
-    	
-    	ctx.writeAndFlush(msg);*/
     	log.debug("channelActive");
     }
     
@@ -61,6 +58,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         log.debug("channelRead:"+msg);
+        
+        if(msg instanceof AbstractMessage){
+        	ClusterChannelHelp.putMsg((AbstractMessage)msg);
+        }
     }
 
     /**
