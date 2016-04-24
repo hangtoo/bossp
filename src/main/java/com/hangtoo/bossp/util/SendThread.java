@@ -2,9 +2,6 @@ package com.hangtoo.bossp.util;
 
 import io.netty.channel.Channel;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.Client;
@@ -45,7 +42,7 @@ public class SendThread extends Thread {
 				Channel channel=client.getChannel();
 				
 				if(channel==null||!channel.isWritable()){
-					this.sleep(Constants.SLEEPTIME);
+					Thread.sleep(Constants.SLEEPTIME);
 					continue;
 				}
 				

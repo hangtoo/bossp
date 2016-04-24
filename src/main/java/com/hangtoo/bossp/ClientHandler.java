@@ -19,8 +19,6 @@
  */
 package com.hangtoo.bossp;
 
-import java.util.concurrent.TimeUnit;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -28,10 +26,11 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
-import com.hangtoo.bossp.codec.HandleReqMessage;
 import com.hangtoo.bossp.util.ClusterChannelHelp;
 
 
