@@ -19,6 +19,8 @@
  */
 package com.hangtoo.bossp;
 
+import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -36,6 +38,18 @@ import com.hangtoo.bossp.util.ClusterChannelHelp;
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger log = Logger.getLogger(ClientHandler.class);
 	
+	@Override
+	public void channelInactive(
+			ChannelHandlerContext ctx) throws Exception {
+		super.channelInactive(ctx);
+		final String remoteAddress=ctx.channel().remoteAddress().toString();
+		ctx.channel().eventLoop()
+				.schedule(new Runnable() {
+					public void run() {
+						Client.getClient(remoteAddress).doConnect();
+					}
+				}, 1, TimeUnit.SECONDS);
+	}
 	
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -75,7 +89,22 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         log.debug("channelReadComplete");
         ctx.flush();
     }
-	
+    
+    @Override
+	public void exceptionCaught(
+			ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		//super.exceptionCaught(ctx,cause);
+		final String remoteAddress=ctx.channel().remoteAddress().toString();
+		ctx.channel().eventLoop()
+				.schedule(new Runnable() {
+					public void run() {
+						Client.getClient(remoteAddress).doConnect();
+					}
+				}, 1, TimeUnit.SECONDS);
+		
+	}
+    
     @Override
     public void userEventTriggered(
             ChannelHandlerContext ctx, Object evt)
@@ -87,10 +116,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             else if(event.state() == IdleState.WRITER_IDLE){
                 log.info("write idle");
             
-	        	HandleReqMessage msg=new HandleReqMessage();
+/*	        	HandleReqMessage msg=new HandleReqMessage();
 	        	msg.getHeader().setSeq(Constants.getMsgId());
 	        	//log.debug("ClientHandler:"+msg);
-	        	ctx.writeAndFlush(msg);
+	        	ctx.writeAndFlush(msg);*/
             
             }else if(event.state() == IdleState.ALL_IDLE){
             	log.info("all idle");

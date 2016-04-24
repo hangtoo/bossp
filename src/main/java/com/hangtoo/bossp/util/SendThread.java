@@ -21,26 +21,16 @@ public class SendThread extends Thread {
 	private Logger log = Logger.getLogger(getClass());
 	private Client client = null;
 	
-	private static Map<String,Client> clients = new Hashtable<String,Client>();
-
 	public SendThread(String hostname,int port,int connecttimeout) throws InterruptedException {
 		String serveraddr=Function.getServeraddr(hostname, port);
-		Client theclient=clients.get(serveraddr);
+		Client theclient=Client.getClient(serveraddr);
 		
-		if(theclient==null){
-			theclient=new Client(hostname,port,connecttimeout);
-			clients.put(serveraddr, theclient);
-		}
 		this.client=theclient;
 	}
 	
 	public SendThread(String serveraddr) throws InterruptedException {
-		Client theclient=clients.get(serveraddr);
+		Client theclient=Client.getClient(serveraddr);
 		
-		if(theclient==null){
-			theclient=new Client(Function.getHost(serveraddr),Function.getPort(serveraddr),1000);
-			clients.put(serveraddr, theclient);
-		}
 		this.client=theclient;
 	}
 	
@@ -59,7 +49,7 @@ public class SendThread extends Thread {
 					continue;
 				}
 				
-				Object obj = ClusterChannelHelp.getSendMsg(channel.localAddress().toString());
+				Object obj = ClusterChannelHelp.getSendMsg(channel.remoteAddress().toString());
 				
 				if(obj instanceof AbstractMessage){
 					client.write((AbstractMessage)obj);

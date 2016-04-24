@@ -22,97 +22,127 @@ package com.hangtoo.bossp;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.net.InetSocketAddress;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
+import com.hangtoo.bossp.codec.HandleReqDecoder;
+import com.hangtoo.bossp.codec.HandleReqEncoder;
+import com.hangtoo.bossp.codec.HandleRspDecoder;
+import com.hangtoo.bossp.codec.HandleRspEncoder;
+import com.hangtoo.bossp.util.ClusterChannelHelp;
+import com.hangtoo.bossp.util.Function;
 
 public class Client {
-	
-	private static final Logger log = Logger.getLogger(Client.class);
-	
-	private int CONNECT_TIMEOUT;
-	
-	private String HOSTNAME;
-	
-	private int PORT;
-	
-	EventLoopGroup group = new NioEventLoopGroup();
-	Bootstrap b = new Bootstrap();
-	ChannelFuture f;
-	
-	Channel channel;
-	
-	private static ExecutorService executorService= Executors.newSingleThreadExecutor();
-	
-	public Client(String hostname,int port,int connecttimeout) throws InterruptedException{
 
-		HOSTNAME=hostname;
+	private static final Logger log = Logger.getLogger(Client.class);
+
+	private String remoteHost;
+
+	private int remotePort;
+
+	private volatile EventLoopGroup workerGroup;
+	private volatile Bootstrap bootstrap;
+	private volatile boolean closed = false;
+
+	private ChannelFuture future;
+
+	private static Map<String,Client> clients = new Hashtable<String,Client>();
+
+	public static Client getClient(String serveraddr){
+		Client theclient=clients.get(serveraddr);
 		
-		PORT=port;
-		
-		CONNECT_TIMEOUT=connecttimeout;
-        
-        b.group(group)
-        .channel(NioSocketChannel.class)
-        //.handler(new LoggingHandler(LogLevel.INFO))
-        .handler(new ClientInitializer());
-        
-        executorService.execute(new connectRunnable());
-	}
-	
-	public class connectRunnable implements Runnable{
-		@Override
-		public void run() {
+		if(theclient==null){
 			try {
-    			connect();
+				theclient=new Client(Function.getHost(serveraddr),Function.getPort(serveraddr));
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			clients.put(serveraddr, theclient);
 		}
-		
+		return theclient;
 	}
 	
-	public void connect() throws InterruptedException{
-		log.info(HOSTNAME+":"+PORT);
-        for (;;) {
-            try {
-                // Make a new connection.
-                f = b.connect(HOSTNAME, PORT).sync();
-                channel=f.channel();
-                
-                // Wait until the connection is closed.
-                channel.closeFuture().sync();
-                break;
-            } finally {
-            	group.shutdownGracefully();
-            }
-        }
+	private Client(String hostname, int port) throws InterruptedException {
+		remoteHost = hostname;
+		remotePort = port;
+		this.init();
 	}
-	
-	
-	public void disconnect(boolean keepconnect) {
-		try {
-			f.channel().closeFuture().sync();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			group.shutdownGracefully();
+
+	public void close() {
+		closed = true;
+		workerGroup.shutdownGracefully();
+		log.info("Stopped Tcp Client: " + getServerInfo());
+	}
+
+	public void init() {
+		closed = false;
+
+		workerGroup = new NioEventLoopGroup();
+		bootstrap = new Bootstrap();
+		bootstrap.group(workerGroup)
+			.channel(NioSocketChannel.class)
+			.handler(new ClientInitializer());
+		doConnect();
+	}
+
+	public void doConnect() {
+		if (closed) {
+			return;
 		}
+		this.future = bootstrap.connect(new InetSocketAddress(
+				remoteHost, remotePort));
+
+		this.future.addListener(new ChannelFutureListener() {
+			public void operationComplete(ChannelFuture f) throws Exception {
+				if (f.isSuccess()) {
+					log.info("Started Tcp Client: " + getServerInfo());
+				} else {
+					log.info("Started Tcp Client Failed: " + getServerInfo());
+
+					f.channel().eventLoop().schedule(new Runnable() {
+						public void run() {
+							doConnect();
+						}
+					}, 1, TimeUnit.SECONDS);
+				}
+			}
+		});
+
 	}
-	
-	public void write(AbstractMessage msg){
+
+	public void write(AbstractMessage msg) {
 		log.info(msg.getHeader().getSeq());
-		f.channel().writeAndFlush(msg);
+		future.channel().writeAndFlush(msg);
 	}
 
 	public Channel getChannel() {
-		return channel;
+		if(future!=null)
+			return future.channel();
+		return null;
+	}
+
+	private String getServerInfo() {
+		return String.format("RemoteHost=%s RemotePort=%d", remoteHost,
+				remotePort);
 	}
 }

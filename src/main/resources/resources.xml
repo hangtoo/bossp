@@ -14,7 +14,7 @@
 		
 	</comment>
 	
-	<entry key="SCMS.SERVERADDR">/127.0.0.1:9000,/10.8.22.182:8500</entry>
+	<entry key="SCMS.SERVERADDR">/127.0.0.1:9000</entry>
 	
 	<entry key="BOSSP.URI">http://localhost:9999/wsdldemo/services/</entry>
 	

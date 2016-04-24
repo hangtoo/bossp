@@ -12,12 +12,15 @@ public class SenderTest {
 	public void testSendMsgCluster() {
 		AbstractMessage ret=null;
 		
-		HandleReqMessage msg= new HandleReqMessage();
-		
-		msg.getHeader().setSeq(Constants.getMsgId());
-		
-		ret=Sender.sendMsgCluster(msg);
-		System.out.println("----------"+ret.getHeader().getSeq()+":"+ret.getHeader().getType());
+		for(int i=0;i<10000;i++){
+			HandleReqMessage msg= new HandleReqMessage();
+			
+			msg.getHeader().setSeq(Constants.getMsgId());
+			
+			ret=Sender.sendMsgCluster(msg);
+			if(ret!=null)
+				System.out.println("----------"+ret.getHeader().getSeq()+":"+ret.getHeader().getType());
+		}
 	}
 
 }

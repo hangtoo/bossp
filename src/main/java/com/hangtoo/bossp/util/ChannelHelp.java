@@ -131,6 +131,7 @@ public class ChannelHelp {
 	 */
 	public AbstractMessage getMsg(int seq) {
 		Object obj=null;
+		log.info("start to getMsg:" + seq);
 		synchronized (msgbuffer) {
 			obj = msgbuffer.remove(seq);
 		}
@@ -151,8 +152,7 @@ public class ChannelHelp {
 			}
 
 		}
-		log.info(
-				"getMsg cost time：" + (System.currentTimeMillis() - tstart));
+		log.info(seq+",getMsg cost time：" + (System.currentTimeMillis() - tstart));
 		return (AbstractMessage) obj;
 	}
 	
