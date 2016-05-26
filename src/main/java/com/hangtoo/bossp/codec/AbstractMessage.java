@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 
 public abstract class AbstractMessage implements Serializable {
+	private static final long serialVersionUID = 544956311354994271L;
 	protected Header header ;
 
 	protected AbstractMessage() {

@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.hangtoo.bossp.util.Constants;
+
 public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 /*	private final byte id;*/
 
@@ -20,29 +22,32 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 
 	private Logger log = Logger.getLogger(getClass());
 	
-	private final TypeParameterMatcher outboundMsgMatcher;
+	private TypeParameterMatcher outboundMsgMatcher;
 
 /*	protected AbstractMessageDecoder(byte id) {
 		this.id = id;	
 	}*/
 	
 	protected AbstractMessageDecoder(Class<? extends AbstractMessage> outboundMessageType) {
+		super();
+		this.setSingleDecode(true);
 		this.outboundMsgMatcher=TypeParameterMatcher.get(outboundMessageType);
+		//TypeParameterMatcher.get(outboundMessageType);
 	}
-	
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
 		
 		// TODO need to add headlength check
-        if (in.readableBytes() < 2) {
+        if (in.readableBytes() < Constants.LENGTH_HEADER) {//2
             return;
         }
-		
+        in.markReaderIndex();
 		if (!readHeader) {
 			length=in.readShort();//设置长度
 			byte type=in.readByte();
+			System.out.println("================type:"+type);
 			int seq=in.readInt();
 			
 			header.setLength(length);
@@ -57,6 +62,7 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 		AbstractMessage m = decodeBody(ctx, in,header);
 		// Return NEED_DATA if the body is not fully read.
 		if (m == null) {
+			in.resetReaderIndex(); // ByteBuf回到标记位置  
 			return;
 		} else {
 			readHeader = false; // reset readHeader for the next decode

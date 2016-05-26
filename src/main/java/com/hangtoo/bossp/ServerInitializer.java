@@ -20,6 +20,10 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import com.hangtoo.bossp.codec.AddAccountReqDecoder;
+import com.hangtoo.bossp.codec.AddAccountReqEncoder;
+import com.hangtoo.bossp.codec.AddAccountRspDecoder;
+import com.hangtoo.bossp.codec.AddAccountRspEncoder;
 import com.hangtoo.bossp.codec.HandleReqDecoder;
 import com.hangtoo.bossp.codec.HandleReqEncoder;
 import com.hangtoo.bossp.codec.HandleRspDecoder;
@@ -42,6 +46,12 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         
         pipeline.addLast(new HandleReqEncoder());
         pipeline.addLast(new HandleRspDecoder());
+        
+        pipeline.addLast(new AddAccountReqDecoder());
+        pipeline.addLast(new AddAccountRspEncoder());
+        
+        pipeline.addLast(new AddAccountReqEncoder());
+        pipeline.addLast(new AddAccountRspDecoder());
         
         pipeline.addLast(new IdleStateHandler(10, 5, 0));
         

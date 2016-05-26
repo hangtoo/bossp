@@ -38,7 +38,7 @@ public class ChannelHelp {
 
     //发送消息缓存，其中消息处理线程会逐条获取其中的消息
     
-    private BlockingQueue sendmessges=new ArrayBlockingQueue(Constants.SENDBUFFERSIZE);//服务端缓存
+    private BlockingQueue<AbstractMessage> sendmessges=new ArrayBlockingQueue<AbstractMessage>(Constants.SENDBUFFERSIZE);//服务端缓存
     
     //接收到的反馈消息缓存
     public Map<Integer, AbstractMessage> msgbuffer=new Hashtable<Integer, AbstractMessage>();//普通消息服务端缓存
@@ -47,7 +47,7 @@ public class ChannelHelp {
      * 放入需要发送的消息，如果满了会阻塞
      * @param msg
      */
-	public void putSendMsg(Object msg){
+	public void putSendMsg(AbstractMessage msg){
 		while(sendmessges.remainingCapacity()<=1){
 			log.error("发送线程满了，阻塞了");
 			try {
@@ -164,8 +164,8 @@ public class ChannelHelp {
 		synchronized (msgbuffer) {
 			int seq=msg.getHeader().getSeq();
 			if(msgbuffer.size()>=Constants.STACKLSIZE){
-				Set keyset=msgbuffer.keySet();
-				Iterator keyit=keyset.iterator();
+				Set<Integer> keyset=msgbuffer.keySet();
+				Iterator<Integer> keyit=keyset.iterator();
 				int key;
 				Object obj;
 				while(keyit.hasNext()){

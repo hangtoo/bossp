@@ -26,6 +26,8 @@ import io.netty.channel.ChannelPipeline;
 
 import org.apache.log4j.Logger;
 
+import com.hangtoo.bossp.codec.AddAccountReqMessage;
+import com.hangtoo.bossp.codec.AddAccountRspMessage;
 import com.hangtoo.bossp.codec.HandleReqMessage;
 import com.hangtoo.bossp.codec.HandleRspMessage;
 
@@ -62,6 +64,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     		HandleReqMessage message=(HandleReqMessage)msg;
     		
     		HandleRspMessage retmsg=new HandleRspMessage();
+        	retmsg.getHeader().setSeq(message.getHeader().getSeq());
+        	ctx.writeAndFlush(retmsg);
+    	}else if(msg instanceof AddAccountReqMessage){
+    		AddAccountReqMessage message=(AddAccountReqMessage)msg;
+
+    		AddAccountRspMessage retmsg=new AddAccountRspMessage();
         	retmsg.getHeader().setSeq(message.getHeader().getSeq());
         	ctx.writeAndFlush(retmsg);
     	}

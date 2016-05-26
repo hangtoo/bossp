@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
+import com.hangtoo.bossp.codec.HandleReqMessage;
 import com.hangtoo.bossp.util.ClusterChannelHelp;
 
 
@@ -113,13 +114,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             if(event.state() == IdleState.READER_IDLE)
             	log.info("read idle");
             else if(event.state() == IdleState.WRITER_IDLE){
-                log.info("write idle");
+/*                log.info("write idle");
             
-/*	        	HandleReqMessage msg=new HandleReqMessage();
+	        	HandleReqMessage msg=new HandleReqMessage();
 	        	msg.getHeader().setSeq(Constants.getMsgId());
 	        	//log.debug("ClientHandler:"+msg);
-	        	ctx.writeAndFlush(msg);*/
-            
+	        	ctx.writeAndFlush(msg);
+*/            
             }else if(event.state() == IdleState.ALL_IDLE){
             	log.info("all idle");
             }

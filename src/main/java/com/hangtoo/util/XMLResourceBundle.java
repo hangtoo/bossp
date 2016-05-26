@@ -24,15 +24,15 @@ public class XMLResourceBundle extends ResourceBundle {
 
     @Override
     public Enumeration<String> getKeys() {
-        return new Enumeration() {
-                Iterator i = props.keySet().iterator();
+        return new Enumeration<String>() {
+                Iterator<?> i = props.keySet().iterator();
 
                 public boolean hasMoreElements() {
-                    return (i.hasNext());
+                    return i.hasNext();
                 }
 
-                public Object nextElement() {
-                    return i.next();
+                public String nextElement() {
+                    return (String)i.next();
                 }
             };
     }
