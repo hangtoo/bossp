@@ -12,15 +12,15 @@ public class SenderTest {
 	public void testSendMsgCluster() {
 		AbstractMessage ret=null;
 		
-		//for(int i=0;i<10000;i++){
+		for(int i=0;i<10000;i++){
 			AddAccountReqMessage msg= new AddAccountReqMessage();
 			
 			msg.getHeader().setSeq(Constants.getMsgId());
 			
 			ret=Sender.sendMsgCluster(msg);
 			if(ret!=null)
-				System.out.println("----------"+ret.getHeader().getSeq()+":"+ret.getHeader().getType());
-		//}
+				System.out.println("testSendMsgCluster----------"+ret.getHeader().getSeq()+":"+ret.getHeader().getType());
+		}
 	}
 
 }

@@ -117,7 +117,7 @@ public class Client {
 	}
 
 	public void write(AbstractMessage msg) {
-		log.info(msg.getHeader().getSeq());
+		//log.info(msg.getHeader().getSeq());
 		future.channel().writeAndFlush(msg);
 	}
 

@@ -12,7 +12,7 @@ public class HandleRspEncoder extends AbstractMessageEncoder<HandleRspMessage> {
 
 	@Override
 	protected void encodeBody(ChannelHandlerContext ctx,HandleRspMessage msg, ByteBuf buf) {
-		System.out.println("HandleRspEncoder:"+msg);
+		//System.out.println("HandleRspEncoder:"+msg);
 	}
 
 }

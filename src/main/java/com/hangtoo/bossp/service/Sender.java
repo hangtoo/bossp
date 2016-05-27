@@ -28,7 +28,7 @@ public final class Sender {
 	 * @return
 	 */	
 	public static AbstractMessage sendMsgCluster(AbstractMessage msg){
-		System.out.println("i:"+icluster);
+		//System.out.println("i:"+icluster);
 		if(icluster>serviceaddrs.length)
 			icluster=0;
 		

@@ -1,6 +1,8 @@
 package com.hangtoo.bossp.codec;
 
-
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Header{
 	short length;
@@ -36,12 +38,29 @@ public class Header{
 	}
 	
 	@Override
-	public String toString(){
-		StringBuilder ret=new StringBuilder();
-		ret.append("{length:"+length+",");
-		ret.append("{type:"+type+",");
-		ret.append("{seq:"+seq+"}");
-		
-		return ret.toString();
+	public String toString() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    StringBuffer sb = new StringBuffer();  
+	    sb.append("{");  
+	    Field[] fields = this.getClass().getDeclaredFields();  
+	    for (Field field : fields) {
+	        try {  
+	            field.setAccessible(true);  
+	            sb.append(field.getName());  
+	            sb.append(":");  
+	            if (field.get(this) instanceof Date) {  
+	                // 日期的处理  
+	                sb.append(sdf.format(field.get(this)));  
+	            } else {  
+	                sb.append(field.get(this));  
+	            }  
+	            sb.append(",");  
+	        } catch (Exception e) {  
+	            e.printStackTrace();  
+	        }  
+	    }
+	    
+	    sb.append("}");  
+	    return sb.toString();  
 	}
 }

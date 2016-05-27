@@ -3,7 +3,6 @@ package com.hangtoo.bossp.codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.util.internal.TypeParameterMatcher;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 
 	private Logger log = Logger.getLogger(getClass());
 	
-	private TypeParameterMatcher outboundMsgMatcher;
+	//private TypeParameterMatcher outboundMsgMatcher;
 
 /*	protected AbstractMessageDecoder(byte id) {
 		this.id = id;	
@@ -31,7 +30,7 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 	protected AbstractMessageDecoder(Class<? extends AbstractMessage> outboundMessageType) {
 		super();
 		this.setSingleDecode(true);
-		this.outboundMsgMatcher=TypeParameterMatcher.get(outboundMessageType);
+		//this.outboundMsgMatcher=TypeParameterMatcher.get(outboundMessageType);
 		//TypeParameterMatcher.get(outboundMessageType);
 	}
 
@@ -47,9 +46,8 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 		if (!readHeader) {
 			length=in.readShort();//设置长度
 			byte type=in.readByte();
-			System.out.println("================type:"+type);
 			int seq=in.readInt();
-			
+			//System.out.println(seq+":seq================type:"+type);
 			header.setLength(length);
 			header.setType(type);
 			header.setSeq(seq);
@@ -63,8 +61,10 @@ public abstract class AbstractMessageDecoder extends ByteToMessageDecoder  {
 		// Return NEED_DATA if the body is not fully read.
 		if (m == null) {
 			in.resetReaderIndex(); // ByteBuf回到标记位置  
+			out.add(in.readBytes(in.readableBytes()));
 			return;
 		} else {
+			m.setHeader(header);
 			readHeader = false; // reset readHeader for the next decode
 		}
 		

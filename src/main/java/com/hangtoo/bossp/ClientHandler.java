@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import com.hangtoo.bossp.codec.AbstractMessage;
-import com.hangtoo.bossp.codec.HandleReqMessage;
 import com.hangtoo.bossp.util.ClusterChannelHelp;
 
 

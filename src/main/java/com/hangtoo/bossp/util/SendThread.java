@@ -48,7 +48,7 @@ public class SendThread extends Thread {
 				
 				Object obj = ClusterChannelHelp.getSendMsg(channel.remoteAddress().toString());
 				
-				if(obj instanceof AbstractMessage){
+				if(obj!=null&&obj instanceof AbstractMessage){
 					client.write((AbstractMessage)obj);
 				}
 			} catch (Exception e) {

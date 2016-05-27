@@ -131,7 +131,7 @@ public class ChannelHelp {
 	 */
 	public AbstractMessage getMsg(int seq) {
 		Object obj=null;
-		log.info("start to getMsg:" + seq);
+		log.debug("start to getMsg:" + seq);
 		synchronized (msgbuffer) {
 			obj = msgbuffer.remove(seq);
 		}

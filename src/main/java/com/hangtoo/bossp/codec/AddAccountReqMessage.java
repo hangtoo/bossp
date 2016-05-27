@@ -15,7 +15,6 @@ public class AddAccountReqMessage extends AbstractMessage {
 	private int notelength;
 	private byte[] note;
 	
-	
 	public AddAccountReqMessage() {
 		super();
 		header.setType(Constants.COMMAND_ID_ADDACCOUNT_REQ);

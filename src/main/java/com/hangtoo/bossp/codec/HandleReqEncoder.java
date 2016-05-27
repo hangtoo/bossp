@@ -13,7 +13,7 @@ public class HandleReqEncoder extends AbstractMessageEncoder<HandleReqMessage> {
 
 	@Override
 	protected void encodeBody(ChannelHandlerContext ctx,HandleReqMessage msg, ByteBuf buf) {
-		System.out.println("HandleReqEncoder:"+msg);
+		//System.out.println("HandleReqEncoder:"+msg);
 	}
 
 
